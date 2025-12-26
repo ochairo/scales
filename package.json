@@ -1,0 +1,47 @@
+{
+  "name": "@ochairo/scales",
+  "version": "0.0.1",
+  "description": "Framework-agnostic scale functions for data visualization",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && pnpm build:minify",
+    "build:minify": "esbuild dist/index.js dist/linear.js dist/band.js dist/time.js dist/types.js --outdir=dist --format=esm --allow-overwrite --minify --legal-comments=none --tree-shaking=true",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rm -rf dist",
+    "size": "ls -lh dist/*.js | awk '{print $9, $5}'"
+  },
+  "keywords": [
+    "scales",
+    "data-visualization",
+    "charts",
+    "mapping",
+    "ochairo"
+  ],
+  "author": "ochairo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ochairo/scales"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "esbuild": "^0.27.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
