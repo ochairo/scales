@@ -7,8 +7,11 @@
 Scale functions for data visualization.<br>
 _Map data to pixels with zero dependencies._
 
+[![npm version](https://img.shields.io/npm/v/@ochairo/scales)](https://www.npmjs.com/package/@ochairo/scales)
+[![npm downloads](https://img.shields.io/npm/dm/@ochairo/scales)](https://www.npmjs.com/package/@ochairo/scales)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@ochairo/scales)](https://bundlephobia.com/package/@ochairo/scales)
+![CD](https://github.com/ochairo/scales/workflows/CD/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Bundle Size](https://img.shields.io/badge/bundle-lightweight-brightgreen)
 
 </div>
 
