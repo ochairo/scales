@@ -29,8 +29,15 @@
  * @module
  */
 
-export { scaleLinear } from './linear';
-export { scaleBand } from './band';
-export { scaleTime } from './time';
+export { scaleLinear } from "./linear.js";
+export { scaleBand } from "./band.js";
+export { scaleTime } from "./time.js";
+export { scaleLog } from "./log.js";
+export { scalePow, scaleSqrt } from "./pow.js";
+export { scaleOrdinal } from "./ordinal.js";
 
-export type { ScaleFunction, BandScaleFunction } from './types';
+export type {
+  ScaleFunction,
+  BandScaleFunction,
+  OrdinalScaleFunction,
+} from "./types.js";

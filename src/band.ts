@@ -1,4 +1,4 @@
-import type { BandScaleFunction } from './types';
+import type { BandScaleFunction } from "./types.js";
 
 /**
  * Creates a band scale that maps discrete domain values to continuous range bands
@@ -61,6 +61,16 @@ export function scaleBand<T>(
 
   scale.domain = () => d as readonly T[];
   scale.range = () => r;
+
+  scale.setDomain = (domain: readonly T[]) => {
+    d = [...domain];
+    return scale;
+  };
+
+  scale.setRange = (range: readonly [number, number]) => {
+    r = [...range] as [number, number];
+    return scale;
+  };
 
   scale.bandwidth = (): number => {
     return computePositions().bandwidth;
