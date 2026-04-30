@@ -46,15 +46,3 @@ scaleTime([new Date('2024-01-01'), new Date('2024-12-31')], [0, 500]);
 ## Documentation
 
 - [API Reference](./docs/API.md)
-- [Usage Guide](./docs/USAGE.md)
-- [Examples](./docs/EXAMPLES.md)
-
-<br><br>
-
-<div align="center">
-
-[Report Bug](https://github.com/ochairo/scales/issues) • [Request Feature](https://github.com/ochairo/scales/issues)
-
-**Made with ❤︎ by [ochairo](https://github.com/ochairo)**
-
-</div>
