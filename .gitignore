@@ -306,9 +306,3 @@ sessions/
 
 # Turborepo cache
 .turbo/
-
-# ============================================
-# OTHER PROJECT-SPECIFIC IGNORES
-# ============================================
-.github/*
-!.github/workflows/
