@@ -45,4 +45,15 @@ scaleTime([new Date('2024-01-01'), new Date('2024-12-31')], [0, 500]);
 
 ## Documentation
 
+Linear, logarithmic, and time ticks require finite domain endpoints and a finite
+positive count of at most 10,000. Logarithmic domains must stay on one side of
+zero; the base must be finite, positive, and different from one. These conditions
+are checked when generating ticks, including after changing a domain.
+
+Tick generation examines at most 10,000 candidates per call and throws
+`RangeError` if that budget is exceeded. The count is a target, not a guarantee:
+large calendar ranges can exceed the budget even with a small requested count.
+No partial result is returned on budget exhaustion. Narrow the domain or handle
+the error. Invalid dates and non-finite numeric endpoints also throw `RangeError`.
+
 - [API Reference](./docs/API.md)

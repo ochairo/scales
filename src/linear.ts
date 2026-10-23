@@ -1,5 +1,6 @@
 import type { ScaleFunction } from "./types.js";
 import { clampValue, interpolate, normalize, tickStep } from "./types.js";
+import { assertTickBudget, validateTickRequest } from "./tick-budget.js";
 
 /**
  * Creates a linear scale that maps a continuous domain to a continuous range
@@ -69,24 +70,36 @@ export function scaleLinear(
 
   scale.ticks = (count = 10): number[] => {
     const [start, stop] = d[0] <= d[1] ? [d[0], d[1]] : [d[1], d[0]];
+    validateTickRequest(count, start, stop);
+    const endpoints = (): number[] => d[0] === d[1] ? [d[0]] : [d[0], d[1]];
     const step = tickStep(start, stop, count);
-    if (step === 0) return [start];
+    if (!(step > 0) || !Number.isFinite(step)) return endpoints();
     const i0 = Math.ceil(start / step);
     const i1 = Math.floor(stop / step);
+    if (!Number.isFinite(i0) || !Number.isFinite(i1)) return endpoints();
     const ticks: number[] = [];
-    for (let i = i0; i <= i1; i++) {
-      ticks.push(i * step);
+    // Absolute indexes above 2^53 may not advance when incremented by one.
+    for (let offset = 0; offset <= i1 - i0; offset++) {
+      assertTickBudget(offset);
+      const tick = (i0 + offset) * step;
+      if (Number.isFinite(tick) && tick >= start && tick <= stop && tick !== ticks[ticks.length - 1]) {
+        ticks.push(tick);
+      }
     }
+    if (ticks.length === 0) return endpoints();
     return d[0] <= d[1] ? ticks : ticks.reverse();
   };
 
   scale.nice = (count = 10) => {
     const [start, stop] = d[0] <= d[1] ? [d[0], d[1]] : [d[1], d[0]];
+    validateTickRequest(count, start, stop);
     const step = tickStep(start, stop, count);
-    if (step > 0) {
+    if (step > 0 && Number.isFinite(step)) {
       const niceStart = Math.floor(start / step) * step;
       const niceStop = Math.ceil(stop / step) * step;
-      d = d[0] <= d[1] ? [niceStart, niceStop] : [niceStop, niceStart];
+      if (Number.isFinite(niceStart) && Number.isFinite(niceStop)) {
+        d = d[0] <= d[1] ? [niceStart, niceStop] : [niceStop, niceStart];
+      }
     }
     return scale;
   };

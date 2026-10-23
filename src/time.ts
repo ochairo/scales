@@ -1,5 +1,6 @@
 import type { ScaleFunction } from "./types.js";
 import { clampValue, interpolate, normalize } from "./types.js";
+import { assertTickBudget, validateTickRequest } from "./tick-budget.js";
 
 /**
  * Creates a time scale that maps Date objects to a continuous range
@@ -67,6 +68,7 @@ export function scaleTime(
   scale.ticks = (count = 10): Date[] => {
     const t0 = d[0].getTime();
     const t1 = d[1].getTime();
+    validateTickRequest(count, t0, t1);
     const [start, stop] = t0 <= t1 ? [t0, t1] : [t1, t0];
     const span = stop - start;
     const target = span / Math.max(1, count);
@@ -123,12 +125,14 @@ export function scaleTime(
     }
 
     const ticks: Date[] = [];
+    let candidateCount = 0;
     const { spec } = best;
 
     if (spec.kind === "ms") {
       // Fixed millisecond intervals — epoch-aligned snapping works for all
       const first = Math.ceil(start / spec.ms) * spec.ms;
       for (let t = first; t <= stop; t += spec.ms) {
+        assertTickBudget(candidateCount++);
         ticks.push(new Date(t));
       }
     } else if (spec.kind === "month") {
@@ -159,7 +163,8 @@ export function scaleTime(
 
       while (true) {
         const t = Date.UTC(year, month, 1);
-        if (t > stop) break;
+        if (!Number.isFinite(t) || t > stop) break;
+        assertTickBudget(candidateCount++);
         ticks.push(new Date(t));
         month += spec.months;
         while (month >= 12) {
@@ -186,7 +191,8 @@ export function scaleTime(
 
       while (true) {
         const t = Date.UTC(year, 0, 1);
-        if (t > stop) break;
+        if (!Number.isFinite(t) || t > stop) break;
+        assertTickBudget(candidateCount++);
         ticks.push(new Date(t));
         year += spec.years;
       }

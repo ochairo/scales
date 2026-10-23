@@ -1,5 +1,6 @@
 import type { ScaleFunction } from "./types.js";
 import { clampValue, interpolate, normalize } from "./types.js";
+import { assertTickBudget, validateTickRequest } from "./tick-budget.js";
 
 /**
  * Creates a logarithmic scale that maps a continuous domain to a continuous range
@@ -39,6 +40,9 @@ export function scaleLog(
   let shouldClamp = false;
 
   const logBase = Math.log(base);
+  if (!Number.isFinite(base) || base <= 0 || base === 1) {
+    throw new RangeError("Logarithm base must be finite, positive, and different from one");
+  }
 
   // Handles negative domains by mirroring through log space
   const log = (x: number): number =>
@@ -71,18 +75,34 @@ export function scaleLog(
   };
 
   scale.ticks = (count = 10): number[] => {
+    validateTickRequest(count, d[0], d[1]);
+    if (d[0] === 0 || d[1] === 0 || Math.sign(d[0]) !== Math.sign(d[1])) {
+      throw new RangeError("Logarithmic tick domains must not include or cross zero");
+    }
     // Work in absolute space; handle negative domains at the end
     const isNeg = d[0] < 0;
-    const absMin = isNeg ? Math.abs(d[1]) : d[0];
-    const absMax = isNeg ? Math.abs(d[0]) : d[1];
+    const absMin = Math.min(Math.abs(d[0]), Math.abs(d[1]));
+    const absMax = Math.max(Math.abs(d[0]), Math.abs(d[1]));
 
-    const lo = Math.floor(Math.log(absMin) / logBase);
-    const hi = Math.ceil(Math.log(absMax) / logBase);
+    const lo = Math.floor(Math.log(absMin) / Math.abs(logBase));
+    const hi = Math.ceil(Math.log(absMax) / Math.abs(logBase));
     const nDecades = hi - lo;
 
     if (nDecades <= 0) return [];
 
     const result: number[] = [];
+    let candidates = 0;
+    const considerTick = (value: number): void => {
+      assertTickBudget(candidates++);
+      if (
+        Number.isFinite(value) && value > 0 &&
+        value >= absMin - absMax * 1e-10 &&
+        value <= absMax + absMax * 1e-10 &&
+        value !== result[result.length - 1]
+      ) {
+        result.push(value);
+      }
+    };
 
     if (base === 10 && nDecades < count) {
       // For base 10 include nice sub-decade multipliers (1,2,5 pattern)
@@ -98,26 +118,20 @@ export function scaleLog(
 
       for (let e = lo; e < hi; e++) {
         for (const m of mults) {
-          const v = Math.pow(10, e) * m;
           // Small epsilon to handle floating point boundaries
-          if (v >= absMin - absMax * 1e-10 && v <= absMax + absMax * 1e-10) {
-            result.push(v);
-          }
+          considerTick(Math.pow(10, e) * m);
         }
       }
       // Always include the upper power boundary
-      const vHi = Math.pow(10, hi);
-      if (vHi >= absMin - absMax * 1e-10 && vHi <= absMax + absMax * 1e-10) {
-        result.push(vHi);
-      }
+      considerTick(Math.pow(10, hi));
     } else {
       // For other bases or when decades >> count: use powers only, stepping if needed
       const step = nDecades > count ? Math.ceil(nDecades / count) : 1;
-      for (let e = lo; e <= hi; e += step) {
-        const v = Math.pow(base, e);
-        if (v >= absMin - absMax * 1e-10 && v <= absMax + absMax * 1e-10) {
-          result.push(v);
-        }
+      for (let offset = 0; offset <= nDecades / step; offset++) {
+        const e = lo + offset * step;
+        const tickBase = base < 1 ? 1 / base : base;
+        const v = Number.isFinite(tickBase) ? Math.pow(tickBase, e) : Math.exp(e * Math.abs(logBase));
+        considerTick(v);
       }
     }
 
