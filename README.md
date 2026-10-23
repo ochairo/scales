@@ -28,6 +28,14 @@ _Map data to pixels with zero dependencies._
 pnpm add @ochairo/scales
 ```
 
+## Upgrading to 2.0.0
+
+Node.js consumers now require Node 24.22.1 or later within the 24.x line, or
+Node 26.12.1 or later. Tick generation validates current domains, logarithm bases,
+and counts, and throws `RangeError` for invalid inputs or excessive candidate
+work. Handle that error or narrow the domain; see the limits below. Extreme
+domains no longer produce infinite or duplicate logarithmic ticks.
+
 ## Quick Start
 
 ```ts

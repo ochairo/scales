@@ -1,6 +1,6 @@
 {
   "name": "@ochairo/scales",
-  "version": "1.6.10",
+  "version": "2.0.0",
   "description": "Framework-agnostic scale functions for data visualization",
   "type": "module",
   "main": "./dist/index.js",
